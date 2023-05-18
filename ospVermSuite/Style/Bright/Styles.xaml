@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/ospVermSuite;component/Style/Bright/Resources.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/ospVermSuite;component/Style/Shared/Converters.xaml"/>
+        <ResourceDictionary Source="WindowStyles.xaml"/>
+        <ResourceDictionary Source="DataGridStyles.xaml"/>
+        <ResourceDictionary Source="ButtonStyles.xaml"/>
+        <ResourceDictionary Source="ToggleButtonStyles.xaml"/>
+
+    </ResourceDictionary.MergedDictionaries>
+    <Style TargetType="Window" BasedOn="{StaticResource StandardWindow}"/>
+    <Style TargetType="DataGrid" BasedOn="{StaticResource StandardDataGrid}"/>
+    <!-- <Style TargetType="Button" BasedOn="{StaticResource StandardButton}"/> -->
+
+</ResourceDictionary>

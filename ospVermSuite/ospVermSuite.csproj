@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <!-- <Nullable>enable</Nullable> -->
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Style\Bright\Datagrid_checked.png" />
+    <None Remove="Style\Tachy.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Style\Bright\DataGridStyles.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Style\Bright\Tachy.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BrxMgd">
+      <HintPath>..\..\BrxMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="TD_Mgd">
+      <HintPath>..\..\TD_Mgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Style\Bright\DataGridStyles.xaml" />
+    <Resource Include="Style\Bright\Datagrid_checked.png" />
+  </ItemGroup>
+
+</Project>

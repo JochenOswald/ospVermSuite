@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ospVermSuite": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Bricsys\\BricsCAD V22 de_DE\\bricscad.exe",
+      "nativeDebugging": true
+    }
+  }
+}

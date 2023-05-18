@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="PrimaryColor" Color="#6667AB"/>
+    <SolidColorBrush x:Key="SecondaryColor" Color="#FBAD26"/>
+
+    <SolidColorBrush x:Key="LightBackground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BackgroundSelected" Color="#C7C7C7"/>
+    <SolidColorBrush x:Key="BackgroundNormal" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BackgroundHighlighted" Color="#BBBBBB"/>
+    <SolidColorBrush x:Key="Foreground" Color="#010101"/>
+    
+    <!-- Für Datagrid -->
+    <SolidColorBrush x:Key="HeaderBackground" Color="#EFEFEF"/>
+    <SolidColorBrush x:Key="OptionOff" Color="#DDDEDE"/>
+    <BitmapImage x:Key="DatagridChecked" UriSource="/Style/Bright/Datagrid_checked.png" />
+
+    <!-- Buttons -->
+    <SolidColorBrush x:Key="OutlineButtonText" Color="#000000"/>
+    <SolidColorBrush x:Key="OutlineButtonDown" Color="#000000"/>
+
+</ResourceDictionary>

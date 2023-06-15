@@ -7,6 +7,31 @@ using System.Windows.Controls;
 using ospVermSuite.Datatypes;
 using System.Threading;
 using System.ComponentModel;
+using System.Windows.Shapes;
+
+// ODA
+using Teigha.Runtime;
+using Teigha.DatabaseServices;
+using Teigha.Geometry;
+
+// Bricsys
+using Bricscad.ApplicationServices;
+using Bricscad.Runtime;
+using Bricscad.EditorInput;
+using Bricscad.Ribbon;
+using Bricscad.Geometrical3dConstraints;
+
+// alias
+using _AcRx = Teigha.Runtime;
+using _AcAp = Bricscad.ApplicationServices;
+using _AcDb = Teigha.DatabaseServices;
+using _AcGe = Teigha.Geometry;
+using _AcEd = Bricscad.EditorInput;
+using _AcGi = Teigha.GraphicsInterface;
+using _AcClr = Teigha.Colors;
+using _AcWnd = Bricscad.Windows;
+using System.Security.Cryptography;
+
 
 namespace ospVermSuite.Windows
 {
@@ -25,6 +50,27 @@ namespace ospVermSuite.Windows
 
         public ProjectPanel()
         {
+            Uri rd1;
+            Uri rd2;
+            if (System.Convert.ToInt32(_AcAp.Application.GetSystemVariable("COLORTHEME")) == 0)
+            {
+                rd1 = new Uri("pack://application:,,,/ospVermSuite;component/Style/Dark/Styles.xaml", UriKind.RelativeOrAbsolute);
+                rd2 = new Uri("pack://application:,,,/ospVermSuite;component/Style/Dark/Resources.xaml", UriKind.RelativeOrAbsolute);
+                this.Resources.MergedDictionaries.Clear();
+                this.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary() { Source = rd1 });
+                this.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary() { Source = rd2 });
+
+            }
+            else
+            {
+                rd1 = new Uri("pack://application:,,,/ospVermSuite;component/Style/Bright/Styles.xaml", UriKind.RelativeOrAbsolute);
+                rd2 = new Uri("pack://application:,,,/ospVermSuite;component/Style/Bright/Resources.xaml", UriKind.RelativeOrAbsolute);
+                this.Resources.MergedDictionaries.Clear();
+                this.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary() { Source = rd1 });
+                this.Resources.MergedDictionaries.Add(new System.Windows.ResourceDictionary() { Source = rd2 });
+
+            }
+
             InitializeComponent();
             bgWorker.DoWork += bgWorker_DoWork;
             bgWorker.RunWorkerCompleted += bgWorker_Completed;
@@ -43,27 +89,48 @@ namespace ospVermSuite.Windows
         private void PopulateTreeView()
         {
             folderTree.Items.Clear();
-            TreeViewItem rootNode;
+            TreeViewItem stakeoutNode = new TreeViewItem();
+            stakeoutNode.Header = "Absteckung";
+            stakeoutNode.Tag = "Stakeout";
+            stakeoutNode.Selected += new RoutedEventHandler(Stakeout_Selected);
+            folderTree.Items.Add(stakeoutNode);
+
+            TreeViewItem drawingNode = new TreeViewItem();
+            drawingNode.Header = "Zeichnung";
+            drawingNode.Tag = "Drawing";
+            drawingNode.Selected += new RoutedEventHandler (Drawing_Selected);
+            folderTree.Items.Add(drawingNode);
+
+            TreeViewItem filesystemNode = new TreeViewItem();
+            filesystemNode.Header = "Dieser PC";
+            filesystemNode.Tag = "MyComputer";
+            folderTree.Items.Add(filesystemNode);
+            AddLogicalDrives(filesystemNode);
+        }
+
+        private void AddLogicalDrives(TreeViewItem treeViewItem)
+        {
+            TreeViewItem subNode = new TreeViewItem();
             foreach (string drive in Directory.GetLogicalDrives())
             {
                 DirectoryInfo info = new DirectoryInfo(drive);
                 if (info.Exists)
                 {
-                    rootNode = new TreeViewItem();
-                    rootNode.Header = info.Name;
-                    rootNode.Tag = info.FullName;
-                    rootNode.Items.Add(dummyNode);
+                    subNode = new TreeViewItem();
+                    subNode.Header = info.Name;
+                    subNode.Tag = info.FullName;
+                    subNode.Items.Add(dummyNode);
                     // Beim Erweitern die Unterordner ermitteln + anfügen
-                    rootNode.Expanded += new RoutedEventHandler(FolderTreeItem_Expanded); //(AddDirectories(info,rootNode)) );
-                    // Das selected-Event Bubbelt immer nach oben. Auch wenn e.handled auf true gesetzt wurde.
-                    // Deshalb wurde die Aktion des Select-Events
-                    rootNode.Selected += new RoutedEventHandler(FolderTreeItem_Selected);
-                    folderTree.Items.Add(rootNode);
+                    subNode.Expanded += new RoutedEventHandler(FolderTreeItem_Expanded); //(AddDirectories(info,rootNode)) );
+                                                                                          // Das selected-Event Bubbelt immer nach oben. Auch wenn e.handled auf true gesetzt wurde.
+                                                                                          // Deshalb wurde die Aktion des Select-Events
+                    subNode.Selected += new RoutedEventHandler(FolderTreeItem_Selected);
+                    treeViewItem.Items.Add(subNode);
                 }
 
             }
-        }
 
+        }
         /// <summary>
         /// Ermittelt die Unterordner und fügt sie im Treeview an
         /// </summary>
@@ -120,6 +187,16 @@ namespace ospVermSuite.Windows
             node.IsSelected = true;
         }
 
+        private void Stakeout_Selected(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Absteckung ausgeklappt");
+        }
+
+        private void Drawing_Selected(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Zeichnung ausgeklappt");
+        }
+        
         private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             List<SurveyFile> surveyFiles = new List<SurveyFile>();
@@ -191,7 +268,7 @@ namespace ospVermSuite.Windows
                 {
                     foreach (SurveyFile surveyFile in surveyFiles)
                     {
-                        surveyFile.DrawFile = checkState;
+                        surveyFile.DrawState = checkState;
                     }
                     vermGrid.ItemsSource = null;
                     vermGrid.ItemsSource = surveyFiles;
@@ -211,7 +288,15 @@ namespace ospVermSuite.Windows
         private void Reload_Click(object sender, RoutedEventArgs e)
         {
             var selectedPath = (TreeViewItem)folderTree.SelectedItem;
-            string[] pathSplit = selectedPath.Tag.ToString().Split('\\');
+            if (selectedPath != null)
+            {
+                openPath(selectedPath.Tag as string);
+            }
+        }
+
+        private void openPath(string path)
+        {
+            string[] pathSplit = path.Split('\\');
             PopulateTreeView();
             TreeViewItem parentNode = null;
             TreeViewItem currentNode = null;
@@ -219,35 +304,82 @@ namespace ospVermSuite.Windows
             ItemCollection collection = null;
             for (int i = 0; i < pathSplit.Length; i++)
             {
-                parentNode = currentNode;
                 currentNode = null;
                 if (parentNode == null)
                 {
                     collection = folderTree.Items;
-                    treePath= pathSplit[i] + "\\";
+                    treePath = pathSplit[i] + "\\";
                 }
                 else
                 {
                     collection = parentNode.Items;
-                    treePath= pathSplit[i];
+                    treePath = pathSplit[i];
                 }
-                
+
                 foreach (TreeViewItem item in collection)
                 {
                     if (item.Header.ToString() == treePath)
                     {
                         currentNode = item;
                         currentNode.IsExpanded = true;
+                        //currentNode.IsSelected = true;
                         break;
                     }
                 }
 
-                if (currentNode == parentNode)
+                if (currentNode == null)
                 {
                     break;
+                }
+                else
+                {
+                    parentNode = currentNode;
                 }
             }
             parentNode.IsSelected = true;
         }
+
+         private void Draw_Click(object sender, RoutedEventArgs e)
+        {
+            List<SurveyFile> files = vermGrid.Items.OfType<SurveyFile>().Where(x => x.DrawState == true).ToList();
+
+            BackgroundWorker drawWorker = new BackgroundWorker();
+            drawWorker.DoWork += drawWorker_DoWork;
+            drawWorker.RunWorkerCompleted += drawWorker_Completed;
+            drawWorker.WorkerReportsProgress = false;
+            drawWorker.WorkerSupportsCancellation = true;
+
+            List<object> arguments = new List<object>();
+            arguments.Add(files);
+
+            drawWorker.RunWorkerAsync(argument: arguments);
+
+
+        }
+
+        private async void drawWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            List<SurveyFile> surveyFiles = new List<SurveyFile>();
+
+            List<object> genericlist = e.Argument as List<object>;
+            List<SurveyFile> surveys = (List<SurveyFile>)genericlist[0];
+
+            List<_AcGe.Point2d> minMaxValues = new List<_AcGe.Point2d>();
+            foreach (SurveyFile survey in surveys)
+            {
+                survey.DrawSurvey();
+                minMaxValues.AddRange(survey.minMaxPoints);
+            }
+            _AcGe.Point2d minPoint = new _AcGe.Point2d(minMaxValues.Min(p => p.X),minMaxValues.Min(p => p.Y));
+            _AcGe.Point2d maxPoint = new _AcGe.Point2d(minMaxValues.Max(p => p.X), minMaxValues.Max(p => p.Y));
+            dwgHelper.dwgFuncs.ZoomWindow(minPoint, maxPoint);
+        }
+
+        private void drawWorker_Completed(object sender, RunWorkerCompletedEventArgs e)
+        {
+            
+        }
+
+
     }
 }

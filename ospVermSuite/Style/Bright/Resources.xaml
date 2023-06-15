@@ -16,7 +16,11 @@
     <BitmapImage x:Key="DatagridChecked" UriSource="/Style/Bright/Datagrid_checked.png" />
 
     <!-- Buttons -->
-    <SolidColorBrush x:Key="OutlineButtonText" Color="#000000"/>
-    <SolidColorBrush x:Key="OutlineButtonDown" Color="#000000"/>
+    <SolidColorBrush x:Key="OutlineButtonText" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="OutlineButtonDown" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BackgroundMouseOver" Color="#F1F1F1"/>
+    <SolidColorBrush x:Key="BackgroundIsPressed" Color="#EAEAEA"/>
+    <SolidColorBrush x:Key="PrimaryColorHover" Color="#6E6FB8"/>
+    <SolidColorBrush x:Key="PrimaryColorPressed" Color="#575891"/>
 
 </ResourceDictionary>

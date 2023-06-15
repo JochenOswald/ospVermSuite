@@ -3,8 +3,34 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+
+
+// ODA
+using Teigha.Runtime;
+using Teigha.DatabaseServices;
+using Teigha.Geometry;
+
+// Bricsys
+using Bricscad.ApplicationServices;
+using Bricscad.Runtime;
+using Bricscad.EditorInput;
+using Bricscad.Ribbon;
+using Bricscad.Geometrical3dConstraints;
+
+// alias
+using _AcRx = Teigha.Runtime;
+using _AcAp = Bricscad.ApplicationServices;
+using _AcDb = Teigha.DatabaseServices;
+using _AcGe = Teigha.Geometry;
+using _AcEd = Bricscad.EditorInput;
+using _AcGi = Teigha.GraphicsInterface;
+using _AcClr = Teigha.Colors;
+using _AcWnd = Bricscad.Windows;
+using System.Windows;
+using System.Threading;
 
 namespace ospVermSuite.Datatypes
 {
@@ -18,7 +44,7 @@ namespace ospVermSuite.Datatypes
         #endregion
 
         #region Properties
-        public bool DrawFile { get; set; }
+        public bool DrawState { get; set; }
         public FileInfo FileInfo
         {
             get
@@ -46,6 +72,17 @@ namespace ospVermSuite.Datatypes
             set
             { _surveyDay = value; }
         }
+        public List<_AcGe.Point2d> minMaxPoints
+        { get
+            {
+                List<_AcGe.Point2d> _minMaxPoints = new List<_AcGe.Point2d>();
+                List<SurveyPoint> points = getPoints();
+                _minMaxPoints.Add(new Point2d(points.Min(p => p.XCoord), points.Min(p => p.YCoord)));
+                _minMaxPoints.Add(new Point2d(points.Max(p => p.XCoord), points.Max(p => p.YCoord)));
+
+                return _minMaxPoints;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -59,7 +96,7 @@ namespace ospVermSuite.Datatypes
                 throw new FileNotFoundException(FileName);
             }
 
-            DrawFile = true;
+            DrawState = true;
             _fileInfo = new FileInfo(FileName);
             string[] clines = File.ReadAllLines(FileName);
             List<string> list = new List<string>();
@@ -86,5 +123,43 @@ namespace ospVermSuite.Datatypes
         }
             #endregion,
 
+        private List<SurveyPoint> getPoints()
+        {
+            if (File.Exists(_fileInfo.FullName) == false)
+            { throw new FileNotFoundException(); }
+
+            List<SurveyPoint> points = new List<SurveyPoint>();
+
+            using (StreamReader reader = new StreamReader(_fileInfo.FullName))
+            {
+                while (reader.Peek() >= 0)
+                {
+                    string line = reader.ReadLine();
+                    if (line.Substring(0,2) != ";;") //Kommentare nicht bearbeiten
+                    {
+                        string[] pointArray = line.Split(';');
+                        points.Add(new SurveyPoint(pointArray));
+                    }
+                }
+            }
+            return points;
         }
+
+        public void DrawSurvey()
+        {
+            _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(string.Format("Zeichne {0} ",FileInfo.Name));
+            List<SurveyPoint> points = getPoints();
+            if (points == null)
+            { return; }
+
+            foreach (SurveyPoint point in points)
+            {
+                point.Draw(_surveyor,_surveyDay.ToString(),_description);
+                _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(".");
+            }
+            _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\n");
+
+        }
+
+    }
 }

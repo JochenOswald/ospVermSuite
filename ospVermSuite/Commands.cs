@@ -30,6 +30,8 @@ using _AcClr = Teigha.Colors;
 using _AcWnd = Bricscad.Windows;
 using ospVermSuite.Windows;
 using System.Windows.Media.Imaging;
+using System.Security.Cryptography;
+//using System.Windows;
 
 [assembly: CommandClass(typeof(ospVermSuite.Commands))]
 
@@ -44,6 +46,7 @@ namespace ospVermSuite
     {
         public void Initialize()
         {
+            
             try
             {
                 if (RibbonServices.RibbonPaletteSet == null)
@@ -54,11 +57,19 @@ namespace ospVermSuite
                 dockTempl.DefaultStackId = "RDOCK"; //default stack is RDOCK panelset
                 dockTempl.DefaultStackZ = 20; //default to position 20 (bottom of the stack)
                 dockTempl.DefaultDock = _AcWnd.DockSides.Right; //dock alone at right in case RDOCK panelset isn't available
-                _AcWnd.Panel panel = new _AcWnd.Panel("VermSuite", new Windows.ProjectPanel() );
+                Windows.ProjectPanel projectPanel = new Windows.ProjectPanel();
+                
+                _AcWnd.Panel panel = new _AcWnd.Panel("VermSuite", projectPanel );
                 panel.Title = "VermSuite";
-
-                panel.Icon =  ImageSourceFromEmbeddedResourceStream(@"ospVermSuite.Style.Bright.Tachy.ico");
-                panel.Visible = true;
+                if (System.Convert.ToInt32(Application.GetSystemVariable("COLORTHEME"))==1)
+                {
+                    panel.Icon = ImageSourceFromEmbeddedResourceStream(@"ospVermSuite.Style.Bright.Tachy.ico");
+                }
+                else
+                {
+                    panel.Icon= ImageSourceFromEmbeddedResourceStream(@"ospVermSuite.Style.Dark.Tachy.ico");
+                }
+                //panel.Visible = true;
             }
             catch (System.Exception e)
             {
@@ -69,6 +80,30 @@ namespace ospVermSuite
         public void Terminate()
         {
             //Application.ShowAlertDialog("The commands class is Terminating");
+        }
+
+        [CommandMethod("VermTipEin")]
+        public static void VermTipEin()
+        {
+            Editor myEditor = _AcAp.Application.DocumentManager.MdiActiveDocument.Editor;
+            myEditor.WriteMessage("Zum Anzeigen mit der Maus über einen Vermessungspunkt fahren");
+            myEditor.PointMonitor -= new PointMonitorEventHandler(Functions.VermFunctions.OnPointMonitor);
+            myEditor.PointMonitor += new PointMonitorEventHandler(Functions.VermFunctions.OnPointMonitor);
+        }
+
+        [CommandMethod("VermTipAus")]
+        public static void VermTipAus()
+        {
+            Editor myEditor = _AcAp.Application.DocumentManager.MdiActiveDocument.Editor;
+            myEditor.PointMonitor -= new PointMonitorEventHandler(Functions.VermFunctions.OnPointMonitor);
+        }
+
+        [CommandMethod("VermInfo")]
+        public void VermInfo()
+        {
+            //Punktverwaltung.DoDrawDirectory();
+            InfoDialog infoDialog = new InfoDialog();
+            _AcAp.Application.ShowModalWindow(infoDialog);
         }
 
         static private System.Windows.Media.ImageSource ImageSourceFromEmbeddedResourceStream(string resName)

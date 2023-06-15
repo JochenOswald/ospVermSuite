@@ -7,7 +7,7 @@
         xmlns:converter="clr-namespace:ospVermSuite.Functions"
         mc:Ignorable="d"
              Height="450" Width="800">
-    <UserControl.Resources>
+    <!-- <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/ospVermSuite;component/Style/Bright/Styles.xaml"/>
@@ -15,17 +15,20 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 
-    </UserControl.Resources>
+    </UserControl.Resources> -->
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
-            <TextBlock Margin="0,15,0,15" FontSize="12" FontWeight="SemiBold">Vermessung</TextBlock>
+            <TextBlock Margin="0,15,0,15" FontSize="12" Style="{StaticResource PanelHeader}">Vermessung</TextBlock>
             <StackPanel Orientation="Horizontal">
-                <Button Name="Reload" Content="Laden" 
-                              Click="Reload_Click" Height="20   "/>
+                <Button Name="Reload" Style="{StaticResource PanelButton}" Width="16" Height="16"
+                              Click="Reload_Click" >
+                    <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
+                </Button>
             </StackPanel>
         </StackPanel>
         <Grid Grid.Row="1">
@@ -36,8 +39,8 @@
             </Grid.ColumnDefinitions>
             <TreeView Name="folderTree" Grid.Column="0" >
             </TreeView>
-            <GridSplitter Width="10" Grid.Column="3" HorizontalAlignment="Center"/>
-            <DataGrid Name="vermGrid" Grid.Column="4" AutoGenerateColumns="False" ItemsSource="{Binding Path=SurveyFile}" >
+            <GridSplitter Width="10" Grid.Column="1" HorizontalAlignment="Center"/>
+            <DataGrid Name="vermGrid" Grid.Column="2" AutoGenerateColumns="False" ItemsSource="{Binding Path=SurveyFile}" >
                 <DataGrid.Columns>
                     <DataGridTemplateColumn>
                         <DataGridTemplateColumn.Header>
@@ -47,7 +50,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ToggleButton Name="switchFileDraw" Style="{StaticResource ToggleButtonDrawFile}" IsChecked="{Binding DrawFile}">
+                                <ToggleButton Name="switchFileDraw" Style="{StaticResource ToggleButtonDrawFile}">
                                 </ToggleButton>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -87,5 +90,7 @@
             </DataGrid>
 
         </Grid>
+        <Button Grid.Row="2" x:Name="Draw" Content="&#xE70F;" FontFamily="Segoe MDL2 Assets" Style="{StaticResource PrimaryButton}" 
+                HorizontalAlignment="Right" Height="30" Click="Draw_Click"/>
     </Grid>
 </UserControl>

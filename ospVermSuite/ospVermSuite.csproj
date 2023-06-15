@@ -4,19 +4,29 @@
     <TargetFramework>net48</TargetFramework>
     <!-- <Nullable>enable</Nullable> -->
     <UseWPF>true</UseWPF>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Style\Bright\Datagrid_checked.png" />
+    <None Remove="Style\Dark\Datagrid_checked.png" />
+    <None Remove="Style\Dark\Tachy.ico" />
+    <None Remove="Style\Shared\VermSuiteInfo.png" />
     <None Remove="Style\Tachy.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <Page Remove="Style\Bright\DataGridStyles.xaml" />
+    <Page Remove="Style\Dark\DataGridStyles.xaml" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Style\Bright\Tachy.ico" />
+    <EmbeddedResource Include="Style\Dark\Tachy.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dwgHelper\dwgHelper.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +44,27 @@
   <ItemGroup>
     <Resource Include="Style\Bright\DataGridStyles.xaml" />
     <Resource Include="Style\Bright\Datagrid_checked.png" />
+    <Resource Include="Style\Dark\DataGridStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Resource>
+    <Resource Include="Style\Dark\Datagrid_checked.png" />
+    <Resource Include="Style\Shared\VermSuiteInfo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>

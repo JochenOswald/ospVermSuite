@@ -31,6 +31,8 @@ using Teigha.GraphicsInterface;
 using System.Globalization;
 using Teigha.Colors;
 using System.Windows.Documents;
+using System.Security.Cryptography;
+using System.Windows.Forms;
 
 namespace ospVermSuite.Datatypes
 {
@@ -39,9 +41,26 @@ namespace ospVermSuite.Datatypes
         public string StandardCode = "151"; // muss noch aus den Einstellungen übernommen werden.
         
         private string _code;
+        private string _pointnr;
+        private double _xcoord;
+        private double _ycoord;
+        private Single _zcoord;
+        private DateTime _date;
 
-        public string PointNr { get; set; }
-        public double XCoord { get; set; }
+        public string PointNr
+        {
+            get
+            { return _pointnr; }
+            set
+            { _pointnr = value; }
+        }
+        public double XCoord
+        {
+            get
+            { return _xcoord; }
+            set
+            { _xcoord = value; }
+        }
         public double YCoord { get; set; }
         public Single ZCoord { get; set; }
         public Single rH { get; set; }
@@ -72,7 +91,7 @@ namespace ospVermSuite.Datatypes
         }
         public Single ZPrecision { get; set; }
         public DateTime Date { get; set; }
-
+        
         public SurveyPoint()
         { }
 
@@ -116,7 +135,7 @@ namespace ospVermSuite.Datatypes
             Date = DateTime.Parse(pointArray[10]);
         }
 
-        public void Draw(string surveyor = "", string date = "", string description = "")
+        public void Draw(string surveyor = "", string date = "", string description = "", string filename = "")
         {
             _AcDb.Database cadDatabase = _AcAp.Application.DocumentManager.MdiActiveDocument.Database;
             using (_AcDb.Transaction transaction = cadDatabase.TransactionManager.StartTransaction())
@@ -131,9 +150,9 @@ namespace ospVermSuite.Datatypes
                     string layerName;
                     layerName = Properties.Settings.Default.LayerPrefix + Code;
                     dwgHelper.dwgFuncs.CheckLayer(layerName);
-                    block.Layer = layerName;
+                                      block.Layer = layerName;
                 }
-                string[] xValues = new string[] { surveyor, date, description, PointNr, Code, Attribut, Math.Round(XPrecision, 3).ToString(), Math.Round(ZPrecision, 3).ToString(), this.Date.ToString(), "" };
+                string[] xValues = new string[] { surveyor, date, description, PointNr, Code, Attribut, Math.Round(XPrecision, 3).ToString(), Math.Round(ZPrecision, 3).ToString(), this.Date.ToString(), filename };
                 block.XData = dwgFuncs.AddXRecordToBlock("osp", xValues);
                 // Beschriftungsblock einfügen
                 var attributeDictionary = new Dictionary<string, string>();
@@ -143,7 +162,7 @@ namespace ospVermSuite.Datatypes
                 attributeDictionary.Add("ZCOORD", ZCoord.ToString());
                 attributeDictionary.Add("RH", rH.ToString());
                 attributeDictionary.Add("CODE", Code);
-                attributeDictionary.Add("ATTRIBUT", Attribut);
+                attributeDictionary.Add("DESCRIPTION", Attribut);
                 attributeDictionary.Add("XPRECISION", XPrecision.ToString());
                 attributeDictionary.Add("YPRECISION", YPrecision.ToString());
                 attributeDictionary.Add("ZPRECISION", ZPrecision.ToString());
@@ -160,13 +179,14 @@ namespace ospVermSuite.Datatypes
                     dwgHelper.dwgFuncs.CheckLayer(textLayerName);
                     beschriftung.Layer = textLayerName;
                 }
-                transaction.Commit();
                 xValues = null;
                 attributeDictionary = null;
                 block.Dispose();
                 beschriftung.Dispose();
+                transaction.Commit();
+                transaction.Dispose();
             }
-            
+            cadDatabase.Dispose();
         }
 
         private _AcClr.Color getPointColor()

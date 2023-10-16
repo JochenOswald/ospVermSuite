@@ -67,6 +67,7 @@ namespace ospVermSuite.Functions
                                     names += string.Format("{0,-40} {1,-30}\n", "Bemerkung:", rvArr[6].Value);
                                     names += string.Format("{0,-40} {1,-30}\n", "Lagequalität:", rvArr[7].Value);
                                     names += string.Format("{0,-40} {1,-30}\n", "Höhenqualität:", rvArr[8].Value);
+                                    names += string.Format("{0,-40} {1,-30}\n", "Datei:", rvArr[9].Value);
                                 }
                             }
                         }

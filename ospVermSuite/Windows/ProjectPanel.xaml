@@ -91,6 +91,6 @@
 
         </Grid>
         <Button Grid.Row="2" x:Name="Draw" Content="&#xE70F;" FontFamily="Segoe MDL2 Assets" Style="{StaticResource PrimaryButton}" 
-                HorizontalAlignment="Right" Height="30" Click="Draw_Click"/>
+                HorizontalAlignment="Left" Height="30" Click="Draw_Click" Margin="764,0,0,0" VerticalAlignment="Top"/>
     </Grid>
 </UserControl>

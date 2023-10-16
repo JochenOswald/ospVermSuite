@@ -367,6 +367,7 @@ namespace ospVermSuite.Windows
             List<_AcGe.Point2d> minMaxValues = new List<_AcGe.Point2d>();
             foreach (SurveyFile survey in surveys)
             {
+                survey.DeleteSurvey();
                 survey.DrawSurvey();
                 minMaxValues.AddRange(survey.minMaxPoints);
             }

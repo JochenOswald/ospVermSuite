@@ -93,10 +93,9 @@ namespace dwgHelper
                         blockTemplate.Dispose();
                     }
                     transaction.Commit();
-                    blockReference.Dispose();
+                    cadDatabase.Dispose();
+                    return blockReference.ObjectId;
                 }
-
-                return blockReference.ObjectId;
             }
         }
 

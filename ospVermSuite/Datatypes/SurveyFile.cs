@@ -59,11 +59,12 @@ namespace ospVermSuite.Datatypes
             set
             { _surveyor = value; }
         }
-        public String Description { 
+        public String Description
+        {
             get
-            {  return _description; }
+            { return _description; }
             set
-            {  _description = value; }
+            { _description = value; }
         }
         public DateTime SurveyDay
         {
@@ -73,7 +74,8 @@ namespace ospVermSuite.Datatypes
             { _surveyDay = value; }
         }
         public List<_AcGe.Point2d> minMaxPoints
-        { get
+        {
+            get
             {
                 List<_AcGe.Point2d> _minMaxPoints = new List<_AcGe.Point2d>();
                 List<SurveyPoint> points = getPoints();
@@ -121,7 +123,7 @@ namespace ospVermSuite.Datatypes
                 }
             }
         }
-            #endregion,
+        #endregion,
 
         private List<SurveyPoint> getPoints()
         {
@@ -135,7 +137,7 @@ namespace ospVermSuite.Datatypes
                 while (reader.Peek() >= 0)
                 {
                     string line = reader.ReadLine();
-                    if (line.Substring(0,2) != ";;") //Kommentare nicht bearbeiten
+                    if (line.Substring(0, 2) != ";;") //Kommentare nicht bearbeiten
                     {
                         string[] pointArray = line.Split(';');
                         points.Add(new SurveyPoint(pointArray));
@@ -145,21 +147,73 @@ namespace ospVermSuite.Datatypes
             return points;
         }
 
+        private static _AcEd.SelectionSet GetAllospObjects()
+        {
+
+            _AcEd.Editor cadEditor = _AcAp.Application.DocumentManager.MdiActiveDocument.Editor;
+            List<_AcDb.TypedValue> filter = new List<_AcDb.TypedValue>();
+
+            filter.Add(new _AcDb.TypedValue((int)_AcDb.DxfCode.Operator, "<and"));
+            filter.Add(new _AcDb.TypedValue((int)_AcDb.DxfCode.ExtendedDataRegAppName, "osp"));
+            filter.Add(new _AcDb.TypedValue((int)_AcDb.DxfCode.Operator, "and>"));
+
+            _AcEd.PromptSelectionResult cadSSPrompt = cadEditor.SelectAll(new _AcEd.SelectionFilter(filter.ToArray()));
+            return cadSSPrompt.Value;
+        }
+
         public void DrawSurvey()
         {
-            _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(string.Format("Zeichne {0} ",FileInfo.Name));
+            _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(string.Format("Zeichne {0} ", FileInfo.Name));
             List<SurveyPoint> points = getPoints();
             if (points == null)
             { return; }
 
             foreach (SurveyPoint point in points)
             {
-                point.Draw(_surveyor,_surveyDay.ToString(),_description);
+                point.Draw(_surveyor, _surveyDay.ToString(), _description, _fileInfo.FullName);
                 _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(".");
             }
             _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\n");
-
         }
 
+        public void DeleteSurvey()
+        {
+            _AcEd.SelectionSet cadSs = GetAllospObjects();
+
+            if (cadSs == null)
+            {
+                _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("Keine Punkte");
+                return;
+            }
+
+            _AcDb.Database cadDatabase = _AcAp.Application.DocumentManager.MdiActiveDocument.Database;
+            using (_AcDb.Transaction transaction = cadDatabase.TransactionManager.StartTransaction())
+            {
+                 // Dictionary<string, string> XDataValue;
+                // Iterate through objects and delete them
+                foreach (SelectedObject cadSelectedObject in cadSs)
+                {
+                    _AcDb.DBObject cadObject = transaction.GetObject(cadSelectedObject.ObjectId, _AcDb.OpenMode.ForWrite);
+                    if (cadObject != null)
+                    {
+                        _AcDb.ResultBuffer rb = cadObject.GetXDataForApplication("osp");
+                        if (rb != null)
+                        {
+                            _AcDb.TypedValue[] rvArr = rb.AsArray();
+                            if (rvArr[10].Value.ToString() == _fileInfo.FullName)
+                            {
+                                cadObject.Erase();
+                                cadObject.Dispose();
+                            }
+                        }
+                    }
+                    cadObject.Dispose();
+                }
+                transaction.Commit();
+                cadSs.Dispose();
+            }
+            cadDatabase.Dispose();
+        }
     }
+
 }

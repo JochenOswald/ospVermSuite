@@ -31,7 +31,9 @@ using _AcGi = Teigha.GraphicsInterface;
 using _AcClr = Teigha.Colors;
 using _AcWnd = Bricscad.Windows;
 using System.Security.Cryptography;
-
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
+using dwgHelper;
 
 namespace ospVermSuite.Windows
 {
@@ -381,6 +383,49 @@ namespace ospVermSuite.Windows
             
         }
 
+        private void Test_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> fileNames = new List<string>();
+            List<SurveyFile> surveyFiles = new List<SurveyFile>();
+            _AcEd.SelectionSet cadSs = dwgFuncs.GetAllospObjects();
 
+            if (cadSs == null)
+            {
+                _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("Keine Punkte");
+                return;
+            }
+
+            _AcDb.Database cadDatabase = _AcAp.Application.DocumentManager.MdiActiveDocument.Database;
+            using (_AcDb.Transaction transaction = cadDatabase.TransactionManager.StartTransaction())
+            {
+                // Dictionary<string, string> XDataValue;
+                // Iterate through objects and delete them
+                foreach (SelectedObject cadSelectedObject in cadSs)
+                {
+                    _AcDb.DBObject cadObject = transaction.GetObject(cadSelectedObject.ObjectId, _AcDb.OpenMode.ForWrite);
+                    if (cadObject != null)
+                    {
+                        _AcDb.ResultBuffer rb = cadObject.GetXDataForApplication("osp");
+                        if (rb != null)
+                        {
+                            _AcDb.TypedValue[] rvArr = rb.AsArray();
+                            fileNames.Add(rvArr[10].Value.ToString());
+
+
+
+
+                        }
+                        }
+                    cadObject.Dispose();
+                }
+                foreach (string fileName  in fileNames.Distinct())
+                {
+                    surveyFiles.Add(new SurveyFile(fileName));
+                }
+                transaction.Commit();
+                cadSs.Dispose();
+            }
+            cadDatabase.Dispose();
+        }
     }
 }

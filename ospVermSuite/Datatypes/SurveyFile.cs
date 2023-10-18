@@ -31,6 +31,7 @@ using _AcClr = Teigha.Colors;
 using _AcWnd = Bricscad.Windows;
 using System.Windows;
 using System.Threading;
+using dwgHelper;
 
 namespace ospVermSuite.Datatypes
 {
@@ -147,19 +148,6 @@ namespace ospVermSuite.Datatypes
             return points;
         }
 
-        private static _AcEd.SelectionSet GetAllospObjects()
-        {
-
-            _AcEd.Editor cadEditor = _AcAp.Application.DocumentManager.MdiActiveDocument.Editor;
-            List<_AcDb.TypedValue> filter = new List<_AcDb.TypedValue>();
-
-            filter.Add(new _AcDb.TypedValue((int)_AcDb.DxfCode.Operator, "<and"));
-            filter.Add(new _AcDb.TypedValue((int)_AcDb.DxfCode.ExtendedDataRegAppName, "osp"));
-            filter.Add(new _AcDb.TypedValue((int)_AcDb.DxfCode.Operator, "and>"));
-
-            _AcEd.PromptSelectionResult cadSSPrompt = cadEditor.SelectAll(new _AcEd.SelectionFilter(filter.ToArray()));
-            return cadSSPrompt.Value;
-        }
 
         public void DrawSurvey()
         {
@@ -178,7 +166,7 @@ namespace ospVermSuite.Datatypes
 
         public void DeleteSurvey()
         {
-            _AcEd.SelectionSet cadSs = GetAllospObjects();
+            _AcEd.SelectionSet cadSs = dwgFuncs.GetAllospObjects();
 
             if (cadSs == null)
             {

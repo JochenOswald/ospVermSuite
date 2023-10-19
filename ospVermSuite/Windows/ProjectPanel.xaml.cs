@@ -104,10 +104,12 @@ namespace ospVermSuite.Windows
             folderTree.Items.Add(drawingNode);
 
             TreeViewItem filesystemNode = new TreeViewItem();
+            Draw.Content = "\xE70F"; 
             filesystemNode.Header = "Dieser PC";
             filesystemNode.Tag = "MyComputer";
             folderTree.Items.Add(filesystemNode);
             AddLogicalDrives(filesystemNode);
+            
         }
 
         private void AddLogicalDrives(TreeViewItem treeViewItem)
@@ -131,7 +133,7 @@ namespace ospVermSuite.Windows
                 }
 
             }
-
+            
         }
         /// <summary>
         /// Ermittelt die Unterordner und fügt sie im Treeview an
@@ -144,7 +146,7 @@ namespace ospVermSuite.Windows
             ExpandNode(parentNode);
             // wenn das nicht gesetzt wird, dann wird das Event auch für den übergeordneten Knoten ausgeführt,
             e.Handled= true;
-
+            Draw.Content = "\xE70F";
         }
 
         private void ExpandNode(TreeViewItem parentNode)
@@ -168,6 +170,7 @@ namespace ospVermSuite.Windows
                 }
                 catch { }
             }
+            Draw.Content = "\xE70F";
         }
 
         /// <summary>
@@ -187,6 +190,7 @@ namespace ospVermSuite.Windows
             // Aus Gründen die keiner kennt wird e.Handled nicht ausgewertet. Die nachfolgenden 2 Zeilen sind dafür ein Workaround
             node.Focus();
             node.IsSelected = true;
+            Draw.Content = "\xE70F";
         }
 
         private void Stakeout_Selected(object sender, RoutedEventArgs e)
@@ -196,7 +200,49 @@ namespace ospVermSuite.Windows
 
         private void Drawing_Selected(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Zeichnung ausgeklappt");
+            List<string> fileNames = new List<string>();
+            List<SurveyFile> surveyFiles = new List<SurveyFile>();
+            _AcEd.SelectionSet cadSs = dwgFuncs.GetAllospObjects();
+
+            if (cadSs == null)
+            {
+                _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("Keine Punkte");
+                return;
+            }
+
+            _AcDb.Database cadDatabase = _AcAp.Application.DocumentManager.MdiActiveDocument.Database;
+            using (_AcDb.Transaction transaction = cadDatabase.TransactionManager.StartTransaction())
+            {
+                // Dictionary<string, string> XDataValue;
+                // Iterate through objects and delete them
+                foreach (SelectedObject cadSelectedObject in cadSs)
+                {
+                    _AcDb.DBObject cadObject = transaction.GetObject(cadSelectedObject.ObjectId, _AcDb.OpenMode.ForWrite);
+                    if (cadObject != null)
+                    {
+                        _AcDb.ResultBuffer rb = cadObject.GetXDataForApplication("osp");
+                        if (rb != null)
+                        {
+                            _AcDb.TypedValue[] rvArr = rb.AsArray();
+                            fileNames.Add(rvArr[10].Value.ToString());
+
+
+
+
+                        }
+                    }
+                    cadObject.Dispose();
+                }
+                foreach (string fileName in fileNames.Distinct())
+                {
+                    surveyFiles.Add(new SurveyFile(fileName));
+                }
+                transaction.Commit();
+                cadSs.Dispose();
+            }
+            cadDatabase.Dispose();
+            vermGrid.ItemsSource = surveyFiles.OrderBy(surveyfile => surveyfile.FileInfo.Name).ToList();
+            Draw.Content = "\xE74D";
         }
         
         private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -231,7 +277,8 @@ namespace ospVermSuite.Windows
         {
             if (e.Result != null)
             {
-                vermGrid.ItemsSource=(List<SurveyFile>)e.Result;
+                List<SurveyFile> surveyFiles = (List<SurveyFile>)e.Result;
+                vermGrid.ItemsSource=surveyFiles.OrderByDescending(surveyfile => surveyfile.SurveyDay).ToList();
             }
             bgWorker.Dispose();
         }
@@ -346,7 +393,11 @@ namespace ospVermSuite.Windows
             List<SurveyFile> files = vermGrid.Items.OfType<SurveyFile>().Where(x => x.DrawState == true).ToList();
 
             BackgroundWorker drawWorker = new BackgroundWorker();
-            drawWorker.DoWork += drawWorker_DoWork;
+            
+            if (Draw.Content=="\xE74D")
+            { drawWorker.DoWork += deleteWorker_DoWork; }
+            else
+            { drawWorker.DoWork += drawWorker_DoWork; }
             drawWorker.RunWorkerCompleted += drawWorker_Completed;
             drawWorker.WorkerReportsProgress = false;
             drawWorker.WorkerSupportsCancellation = true;
@@ -378,54 +429,23 @@ namespace ospVermSuite.Windows
             dwgHelper.dwgFuncs.ZoomWindow(minPoint, maxPoint);
         }
 
+        private async void deleteWorker_DoWork(object sender,DoWorkEventArgs e)
+        {
+            List<SurveyFile> surveyFiles = new List<SurveyFile>();
+
+            List<object> genericlist = e.Argument as List<object>;
+            List<SurveyFile> surveys = (List<SurveyFile>)genericlist[0];
+
+            foreach (SurveyFile survey in surveys)
+            {
+                survey.DeleteSurvey();
+            }
+
+        }
         private void drawWorker_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
             
         }
 
-        private void Test_Click(object sender, RoutedEventArgs e)
-        {
-            List<string> fileNames = new List<string>();
-            List<SurveyFile> surveyFiles = new List<SurveyFile>();
-            _AcEd.SelectionSet cadSs = dwgFuncs.GetAllospObjects();
-
-            if (cadSs == null)
-            {
-                _AcAp.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("Keine Punkte");
-                return;
-            }
-
-            _AcDb.Database cadDatabase = _AcAp.Application.DocumentManager.MdiActiveDocument.Database;
-            using (_AcDb.Transaction transaction = cadDatabase.TransactionManager.StartTransaction())
-            {
-                // Dictionary<string, string> XDataValue;
-                // Iterate through objects and delete them
-                foreach (SelectedObject cadSelectedObject in cadSs)
-                {
-                    _AcDb.DBObject cadObject = transaction.GetObject(cadSelectedObject.ObjectId, _AcDb.OpenMode.ForWrite);
-                    if (cadObject != null)
-                    {
-                        _AcDb.ResultBuffer rb = cadObject.GetXDataForApplication("osp");
-                        if (rb != null)
-                        {
-                            _AcDb.TypedValue[] rvArr = rb.AsArray();
-                            fileNames.Add(rvArr[10].Value.ToString());
-
-
-
-
-                        }
-                        }
-                    cadObject.Dispose();
-                }
-                foreach (string fileName  in fileNames.Distinct())
-                {
-                    surveyFiles.Add(new SurveyFile(fileName));
-                }
-                transaction.Commit();
-                cadSs.Dispose();
-            }
-            cadDatabase.Dispose();
-        }
     }
 }

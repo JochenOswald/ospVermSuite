@@ -17,7 +17,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <TextBlock x:Name="DrawButton" Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource OutlineButtonText}" />
+                    <TextBlock x:Name="DrawButton" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource OutlineButtonText}" />
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="false">

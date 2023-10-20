@@ -5,6 +5,7 @@
     <!-- <Nullable>enable</Nullable> -->
     <UseWPF>true</UseWPF>
     <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <Configurations>Debug;Release;BRX_APP;ARX_A;ARX_APP</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +31,50 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcCoreMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcCui">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcCui.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Acdbmgd">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcDbMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcDx">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcDx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcMr">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcMr.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcSeamless">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcSeamless.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcTcMgd">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcTcMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcWindows">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AcWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AdUIMgd">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AdUIMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AdUiPalettes">
+      <HintPath>..\..\AutoCAD ObjectArx22\inc\AdUiPalettes.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="BrxMgd">
       <HintPath>..\..\BrxMgd.dll</HintPath>
       <Private>False</Private>

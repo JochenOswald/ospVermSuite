@@ -6,30 +6,56 @@ using System.Threading.Tasks;
 using System.Globalization;
 using dwgHelper;
 
-// ODA
-using Teigha.Runtime;
-using Teigha.DatabaseServices;
-using Teigha.Geometry;
+#if BRX_APP
+    using _AcAp = Bricscad.ApplicationServices;
+    using _AcCm = Teigha.Colors;
+    using _AcDb = Teigha.DatabaseServices;
+    using _AcEd = Bricscad.EditorInput;
+    using _AcGe = Teigha.Geometry;
+    using _AcGi = Teigha.GraphicsInterface;
+    using _AcGs = Teigha.GraphicsSystem;
+    using _AcGsk = Bricscad.GraphicsSystem;
+    using _AcPl = Bricscad.PlottingServices;
+    using _AcBrx = Bricscad.Runtime;
+    using _AcTrx = Teigha.Runtime;
+    using _AcWnd = Bricscad.Windows;
+    using _AdWnd = Bricscad.Windows;
+    using _AcRbn = Bricscad.Ribbon;
+    using _AcLy = Teigha.LayerManager;
+    using _AcIo = Teigha.Export_Import; //Bricsys specific
+    using _AcBgl = Bricscad.Global; //Bricsys specific
+    using _AcQad = Bricscad.Quad; //Bricsys specific
+    using _AcInt = Bricscad.Internal;
+    using _AcPb = Bricscad.Publishing;
+    using _AcMg = Teigha.ModelerGeometry; //Bricsys specific
+    using _AcLic = Bricscad.Licensing; //Bricsys specific
+    using _AcMec = Bricscad.MechanicalComponents; //Bricsys specific
+    using _AcBim = Bricscad.Bim; //Bricsys specific
+    using _AcDm = Bricscad.DirectModeling; //Bricsys specific
+    using _AcIfc = Bricscad.Ifc; //Bricsys specific
+    using _AcRhn = Bricscad.Rhino; //Bricsys specific
+    using _AcCiv = Bricscad.Civil; //Bricsys specific
+#elif ARX_APP
+    using _AcAp = Autodesk.AutoCAD.ApplicationServices;
+    using _AcCm = Autodesk.AutoCAD.Colors;
+    using _AcDb = Autodesk.AutoCAD.DatabaseServices;
+    using _AcEd = Autodesk.AutoCAD.EditorInput;
+    using _AcGe = Autodesk.AutoCAD.Geometry;
+    using _AcGi = Autodesk.AutoCAD.GraphicsInterface;
+    using _AcGs = Autodesk.AutoCAD.GraphicsSystem;
+    using _AcGsk = Autodesk.AutoCAD.GraphicsSystem;
+    using _AcPl = Autodesk.AutoCAD.PlottingServices;
+    using _AcPb = Autodesk.AutoCAD.Publishing;
+    using _AcBrx = Autodesk.AutoCAD.Runtime;
+    using _AcTrx = Autodesk.AutoCAD.Runtime;
+    using _AcWnd = Autodesk.AutoCAD.Windows; //AcWindows.dll
+    using _AcRbn = Autodesk.AutoCAD.Ribbon; //AcWindows.dll
+    using _AcInt = Autodesk.AutoCAD.Internal;
+    using _AcLy = Autodesk.AutoCAD.LayerManager;
+#endif 
 
-// Bricsys
-using Bricscad.ApplicationServices;
-using Bricscad.Runtime;
-using Bricscad.EditorInput;
-using Bricscad.Ribbon;
-using Bricscad.Geometrical3dConstraints;
 
-// alias
-using _AcRx = Teigha.Runtime;
-using _AcAp = Bricscad.ApplicationServices;
-using _AcDb = Teigha.DatabaseServices;
-using _AcGe = Teigha.Geometry;
-using _AcEd = Bricscad.EditorInput;
-using _AcGi = Teigha.GraphicsInterface;
-using _AcClr = Teigha.Colors;
-using _AcWnd = Bricscad.Windows;
-using Teigha.GraphicsInterface;
 using System.Globalization;
-using Teigha.Colors;
 using System.Windows.Documents;
 using System.Security.Cryptography;
 using System.Windows.Forms;
@@ -140,10 +166,10 @@ namespace ospVermSuite.Datatypes
             _AcDb.Database cadDatabase = _AcAp.Application.DocumentManager.MdiActiveDocument.Database;
             using (_AcDb.Transaction transaction = cadDatabase.TransactionManager.StartTransaction())
             {
-                ObjectId blockID = dwgFuncs.InsertBlock(Code, new _AcGe.Point3d(XCoord, YCoord, ZCoord), new Scale3d(Properties.Settings.Default.BlockScale));
+                _AcDb.ObjectId blockID = dwgFuncs.InsertBlock(Code, new _AcGe.Point3d(XCoord, YCoord, ZCoord), new _AcGe.Scale3d(Properties.Settings.Default.BlockScale));
 
                 //DBObject block = transaction.GetObject(blockID, OpenMode.ForWrite);
-                Entity block = transaction.GetObject(blockID, OpenMode.ForWrite) as Entity;
+                _AcDb.Entity block = transaction.GetObject(blockID, _AcDb.OpenMode.ForWrite) as _AcDb.Entity;
                 block.Color = getPointColor();
                 if (Properties.Settings.Default.LayerByCode==true)
                 {
@@ -167,9 +193,9 @@ namespace ospVermSuite.Datatypes
                 attributeDictionary.Add("YPRECISION", YPrecision.ToString());
                 attributeDictionary.Add("ZPRECISION", ZPrecision.ToString());
                 attributeDictionary.Add("DATE", Date.ToString());
-                
-                ObjectId beschriftID = dwgFuncs.InsertBlock(Properties.Settings.Default.LabelBlock, new _AcGe.Point3d(XCoord, YCoord, ZCoord), new Scale3d(Properties.Settings.Default.LabelScale), attributeDictionary);
-                Entity beschriftung = transaction.GetObject(beschriftID, OpenMode.ForWrite) as Entity;
+
+                _AcDb.ObjectId beschriftID = dwgFuncs.InsertBlock(Properties.Settings.Default.LabelBlock, new _AcGe.Point3d(XCoord, YCoord, ZCoord), new _AcGe.Scale3d(Properties.Settings.Default.LabelScale), attributeDictionary);
+                _AcDb.Entity beschriftung = transaction.GetObject(beschriftID, _AcDb.OpenMode.ForWrite) as _AcDb.Entity;
                 beschriftung.XData = dwgFuncs.AddXRecordToBlock("osp", xValues);
                 beschriftung.Color = getPointColor();
                 if (Properties.Settings.Default.LayerByCode == true)
@@ -189,9 +215,9 @@ namespace ospVermSuite.Datatypes
             cadDatabase.Dispose();
         }
 
-        private _AcClr.Color getPointColor()
+        private _AcCm.Color getPointColor()
         {
-            _AcClr.Color color = new _AcClr.Color();
+            _AcCm.Color color = new _AcCm.Color();
             double pointPrecision = 0;
             if (Properties.Settings.Default.PrecisionPosition==true)
             {
@@ -204,16 +230,16 @@ namespace ospVermSuite.Datatypes
 
             if (pointPrecision == 0)
             {
-                return Color.FromColorIndex(ColorMethod.ByAci, 256);
+                return _AcCm.Color.FromColorIndex(_AcCm.ColorMethod.ByAci, 256);
             }
             else
             {
                 if (pointPrecision <= Properties.Settings.Default.PrecisionGood)
-                { return Color.FromColorIndex(ColorMethod.ByAci, Properties.Settings.Default.PrecisionGoodColor); }
+                { return _AcCm.Color.FromColorIndex(_AcCm.ColorMethod.ByAci, Properties.Settings.Default.PrecisionGoodColor); }
                 if (pointPrecision > Properties.Settings.Default.PrecisionBad)
-                { return Color.FromColorIndex(ColorMethod.ByAci, Properties.Settings.Default.PrecisionBadColor); }
+                { return _AcCm.Color.FromColorIndex(_AcCm.ColorMethod.ByAci, Properties.Settings.Default.PrecisionBadColor); }
                 // Wenn die Genauigkeit weder gut noch schlecht ist: mittlere Farbe zurückgeben
-                return Color.FromColorIndex(ColorMethod.ByAci, Properties.Settings.Default.PrecisionMediumColor);
+                return _AcCm.Color.FromColorIndex(_AcCm.ColorMethod.ByAci, Properties.Settings.Default.PrecisionMediumColor);
             }
         }
     }
